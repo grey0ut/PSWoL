@@ -5,7 +5,6 @@
 
 BuiltModuleSubdirectory: module
 CopyPaths:
-  - en-US
 #  - DSCResources
   # - Modules
 Encoding: UTF8
