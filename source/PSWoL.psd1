@@ -12,7 +12,10 @@
 RootModule = 'PSWoL.psm1'
 
 # Version number of this module.
-ModuleVersion = '0.0.1'
+ModuleVersion = '0.1.0'
+
+# Supported PSEditions
+CompatiblePSEditions = @('Desktop','Core')
 
 # ID used to uniquely identify this module
 GUID = '3b3c6894-f87a-49b3-aac5-043a5bc132fd'
@@ -93,13 +96,13 @@ PrivateData = @{
 
         Prerelease =  ''
         # Tags applied to this module. These help with module discovery in online galleries.
-        # Tags = @()
+        Tags = 'WOL','WakeOnLAN','ARP','MAC','Desktop','Core','Linux','MacOS','Windows'
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/grey0ut/PSWoL/blob/main/LICENSE'
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/grey0ut/PSWoL'
 
         # A URL to an icon representing this module.
         # IconUri = ''
@@ -110,12 +113,6 @@ PrivateData = @{
     } # End of PSData hashtable
 
 } # End of PrivateData hashtable
-
-# HelpInfo URI of this module
-# HelpInfoURI = ''
-
-# Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-# DefaultCommandPrefix = ''
 
 }
 
