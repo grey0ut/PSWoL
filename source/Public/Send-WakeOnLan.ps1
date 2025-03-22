@@ -3,9 +3,22 @@ function Send-WakeOnLan {
     .SYNOPSIS
     Send a Wake-On-LAN packet to a target address.
     .DESCRIPTION
-    Sends a Wake-On-LAN packet to a target address. Target address can be a MAC address, IP address or potentially a computer name    
+    Sends a Wake-On-LAN packet to a target address. Target address can be a MAC address, IP address or potentially a computer name
+    .PARAMETER TargetAddress
+    Target address to send Wake-On-LAN packet to. Accepts IP address, MAC address or Computer Name.
+    IP must be an IPv4 address.
+    MAC address can be '1234.abde.4321', '12:34:AB:DE:43:21', '12-34-AB-DE-32-21' or '1234ABDE4321' format.
+    Computername needs to be able to resolve to a local computer name. If resolution fails, the packet will not send.
+    .EXAMPLE
+    PS> Send-WakeOnLan -TargetAddress '192.168.15.10'
+
+    # this will attempt to do an ARP lookup for that IP address and send a WOL packet to it
+    .EXAMPLE
+    PS> 'E2-5D-0E-B5-E2-E8', 'DD-20-C9-FF-EC-79', '6D-84-01-BC-D2-CD' | Send-WakeOnLan
+
+    # this will send a WOL packet to each of the 3 MAC addresses.
     #>
-    [CmdletBinding()]
+    [CmdletBinding(SupportsShouldProcess)]
     param (
         [Parameter(ValueFromPipeline,Mandatory)]
         [String[]]$TargetAddress
@@ -23,7 +36,7 @@ function Send-WakeOnLan {
                 'IPAddress' {
                     $ResolvedMac = Resolve-IPToMac -IPAddress $Target
                     if ($ResolvedMac) {
-                        $MacBytes = Convert-MacToBytes -MacAddress $ResolvedMac
+                        $MacBytes = Convert-MacToByte -MacAddress $ResolvedMac
                         [Void]$WolTargets.Add(
                             [PSCustomObject]@{
                                 Identifier = $Target
@@ -35,7 +48,7 @@ function Send-WakeOnLan {
                     }
                 }
                 'MacAddress' {
-                    $MacBytes = Convert-MacToBytes -MacAddress $Target
+                    $MacBytes = Convert-MacToByte -MacAddress $Target
                     if ($MacBytes) {
                         [Void]$WolTargets.Add(
                             [PSCustomObject]@{
@@ -52,7 +65,7 @@ function Send-WakeOnLan {
                     if ($ResolvedIP) {
                         $Mac = Resolve-IPToMac -IPAddress $ResolvedIP
                         if ($Mac) {
-                            $MacBytes = Convert-MacToBytes -MacAddress $Mac
+                            $MacBytes = Convert-MacToByte -MacAddress $Mac
                             [Void]$WolTargets.Add(
                                 [PSCustomObject]@{
                                     Identifier = $Target
@@ -73,12 +86,14 @@ function Send-WakeOnLan {
     end {
         # sent packet to targets
         foreach ($WolTarget in $WolTargets) {
-            try {
-                $UdpClient.Connect(([System.Net.IPAddress]::Broadcast),9)
-                [Void]$UdpClient.Send($($WolTarget.Packet), $($WolTarget.Packet.Length))
-                Write-Verbose "Wake-on-LAN packet sent to $($WolTarget.Identifier)"
-            } catch {
-                Write-Warning "Error sending WOL packet"
+            if ($PSCmdlet.ShouldProcess($($WolTarget.Identifier),"Send WOL Packet")) {
+                try {
+                    $UdpClient.Connect(([System.Net.IPAddress]::Broadcast),9)
+                    [Void]$UdpClient.Send($($WolTarget.Packet), $($WolTarget.Packet.Length))
+                    Write-Verbose "Wake-on-LAN packet sent to $($WolTarget.Identifier)"
+                } catch {
+                    Write-Warning "Error sending WOL packet"
+                }
             }
         }
         $UdpClient.Close()
