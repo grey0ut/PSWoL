@@ -1,69 +1,61 @@
 function Send-WakeOnLan {
     <#
-    
+    .SYNOPSIS
+    Send a Wake-On-LAN packet to a target address.
+    .DESCRIPTION
+    Sends a Wake-On-LAN packet to a target address. Target address can be a MAC address, IP address or potentially a computer name    
     #>
     [CmdletBinding()]
     param (
-        [Parameter(ValueFromPipeline,ParameterSetName="IP")]
-        [ValidateScript({
-            if ([IPAddress]::TryParse($_, [ref]0)) {
-                return $true
-            } else {
-                throw "Error: Not a valid IP address."
-            }
-        })]
-        [String[]]$IPAddress,
-        [Parameter(ValueFromPipeline,ParameterSetName="Mac")]
-        [String[]]$MacAddress,
-        [Parameter(ValueFromPipeline,ParameterSetName="ComputerName")]
-        [String[]]$ComputerName
+        [Parameter(ValueFromPipeline,Mandatory)]
+        [String[]]$TargetAddress
     )
 
     begin {
         $UdpClient = [System.Net.Sockets.UdpClient]::new()
         [Byte[]]$BasePacket = (,0xFF * 6)
-        $Targets = [System.Collections.ArrayList]::new()
+        $WolTargets = [System.Collections.ArrayList]::new()
     }
 
     process {
-        switch ($PSCmdlet.ParameterSetName) {
-            'IP' {
-                foreach ($TargetIP in $IPAddress) {
-                    $ResolvedMac = Resolve-IPToMac -IPAddress $TargetIP
+        foreach ($Target in $TargetAddress) {
+            switch (Resolve-TargetType -Target $Target) {
+                'IPAddress' {
+                    $ResolvedMac = Resolve-IPToMac -IPAddress $Target
                     if ($ResolvedMac) {
                         $MacBytes = Convert-MacToBytes -MacAddress $ResolvedMac
-                        [Void]$Targets.Add(
+                        [Void]$WolTargets.Add(
                             [PSCustomObject]@{
-                                Identifier = $TargetIP
+                                Identifier = $Target
                                 Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
                             }
                         )
                     } else {
-                        Write-Warning "Unable to determine MAC for $TargetIP"
+                        Write-Warning "Unable to determine MAC for $Target"
                     }
                 }
-            }
-            'Mac' {
-                foreach ($TargetMac in $MacAddress) {
-                    $MacBytes = Convert-MacToBytes -MacAddress $TargetMac
-                    [Void]$Targets.Add(
-                        [PSCustomObject]@{
-                            Identifier = $TargetMac
-                            Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
-                        }
-                    )
+                'MacAddress' {
+                    $MacBytes = Convert-MacToBytes -MacAddress $Target
+                    if ($MacBytes) {
+                        [Void]$WolTargets.Add(
+                            [PSCustomObject]@{
+                                Identifier = $Target
+                                Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
+                            }
+                        )
+                    } else {
+                        Write-Warning "Unable to convert MAC to bytes: $Target"
+                    }
                 }
-            }
-            'ComputerName' {
-                foreach ($Computer in $ComputerName) {
-                    $ResolvedIP = Convert-HostnameToIP -ComputerName $Computer
+                'ComputerName' {
+                    $ResolvedIP = Convert-HostnameToIP -ComputerName $Target
                     if ($ResolvedIP) {
                         $Mac = Resolve-IPToMac -IPAddress $ResolvedIP
                         if ($Mac) {
                             $MacBytes = Convert-MacToBytes -MacAddress $Mac
-                            [Void]$Targets.Add(
+                            [Void]$WolTargets.Add(
                                 [PSCustomObject]@{
-                                    Identifier = $Computer
+                                    Identifier = $Target
                                     Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
                                 }
                             )
@@ -71,21 +63,20 @@ function Send-WakeOnLan {
                             Write-Warning "Unable to determine MAC for $ResolvedIP"
                         }
                     } else {
-                        Write-Warning "Unable to resolve IP for $Computer"
+                        Write-Warning "Unable to resolve IP for $Target"
                     }
                 }
             }
         }
-
     }
 
     end {
         # sent packet to targets
-        foreach ($Target in $Targets) {
+        foreach ($WolTarget in $WolTargets) {
             try {
                 $UdpClient.Connect(([System.Net.IPAddress]::Broadcast),9)
-                [Void]$UdpClient.Send($($Target.Packet), $($Target.Packet.Length))
-                Write-Verbose "Wake-on-LAN packet sent to $($Target.Identifier)"
+                [Void]$UdpClient.Send($($WolTarget.Packet), $($WolTarget.Packet.Length))
+                Write-Verbose "Wake-on-LAN packet sent to $($WolTarget.Identifier)"
             } catch {
                 Write-Warning "Error sending WOL packet"
             }

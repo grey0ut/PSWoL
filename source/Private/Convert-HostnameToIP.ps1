@@ -10,7 +10,11 @@ function Convert-HostnameToIP {
         [String]$ComputerName
     )
 
-    [System.Net.Dns]::GetHostEntry($ComputerName).AddressList.IPAddressToString | Where-Object {
-        $_ -notmatch ':'
+    try {
+        [System.Net.Dns]::GetHostEntry($ComputerName).AddressList.IPAddressToString | Where-Object {
+            $_ -notmatch ':'
+        }
+    } catch {
+        return "NotFound"
     }
 }
