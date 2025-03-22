@@ -4,9 +4,23 @@ function Resolve-IPToMac {
     Resolve an IP address to a MAC address
     .DESCRIPTION
     Attempts to find the corresponding MAC address for a given IP address
+    .PARAMETER IPAddress
+    The IP address to look up in ARP and find a corresponding MAC address to send a WOL packet to.
+    Must be an IPv4 address.
+    .EXAMPLE
+    Resolve-IPToMac '192.168.15.10'
+    6D-84-01-BC-D2-CD
     #>
     [CmdletBinding()]
+    [OutputType([System.Net.NetworkInformation.PhysicalAddress])]
     param (
+        [ValidateScript({
+            if ([IPAddress]::TryParse($_, [ref]0)) {
+                return $true
+            } else {
+                throw "Error: Not a valid IP address."
+            }
+        })]
         [String]$IPAddress
     )
 
