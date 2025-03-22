@@ -5,9 +5,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- added pester tests and passed PSScriptAnalyzer tests
+
 ### Added
 
-- Initial publish
 - Ability to target IPs, MACs or computer names
 
+## [0.0.1] - 2025-03-21
 
+- initial commit
