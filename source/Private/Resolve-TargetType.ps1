@@ -16,7 +16,7 @@ function Resolve-TargetType {
         [String]$Target
     )
 
-    $MacReg = '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9a-fA-F]{4}\.[0-9a-fA-F]{4}\.[0-9a-fA-F]{4})$'
+    $MacReg = '^([[:xdigit:]]{2}[:.-]?){5}[[:xdigit:]]{2}$'
     if ($Target -match $MacReg) {
         return "MacAddress"
     } elseif ([System.Net.IPAddress]::TryParse($Target,[ref]0)) {
