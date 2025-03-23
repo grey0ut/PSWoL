@@ -40,6 +40,7 @@ function Send-WakeOnLan {
                         [Void]$WolTargets.Add(
                             [PSCustomObject]@{
                                 Identifier = $Target
+                                MacAddress = $([System.BitConverter]::ToString($MacBytes))
                                 Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
                             }
                         )
@@ -53,6 +54,7 @@ function Send-WakeOnLan {
                         [Void]$WolTargets.Add(
                             [PSCustomObject]@{
                                 Identifier = $Target
+                                MacAddress = $([System.BitConverter]::ToString($MacBytes))
                                 Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
                             }
                         )
@@ -69,6 +71,7 @@ function Send-WakeOnLan {
                             [Void]$WolTargets.Add(
                                 [PSCustomObject]@{
                                     Identifier = $Target
+                                    MacAddress = $([System.BitConverter]::ToString($MacBytes))
                                     Packet = [Byte[]]$($BasePacket; $MacBytes * 16)
                                 }
                             )
@@ -90,7 +93,7 @@ function Send-WakeOnLan {
                 try {
                     $UdpClient.Connect(([System.Net.IPAddress]::Broadcast),9)
                     [Void]$UdpClient.Send($($WolTarget.Packet), $($WolTarget.Packet.Length))
-                    Write-Verbose "Wake-on-LAN packet sent to $($WolTarget.Identifier)"
+                    Write-Verbose "Wake-on-LAN packet sent to target:$($WolTarget.Identifier)     MAC: $($WolTarget.MacAddress)"
                 } catch {
                     Write-Warning "Error sending WOL packet"
                 }
