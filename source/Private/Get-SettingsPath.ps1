@@ -24,4 +24,3 @@ function Get-SettingsPath {
     }
     return $SettingsPath
 }
-
