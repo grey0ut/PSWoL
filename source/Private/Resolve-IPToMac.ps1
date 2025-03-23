@@ -37,7 +37,7 @@ function Resolve-IPToMac {
         }
         [System.Net.NetworkInformation.PhysicalAddress]::Parse(($Result.LinkLayerAddress.ToUpper() -replace '[^0-9A-F]',''))
     } else {
-        $Arp = Get-Command arp | Select-Object -ExpandProperty Source
+        $Arp = Get-Command -Name "arp" | Select-Object -ExpandProperty Source
         $Regex =  '{0}.+{1}' -f $([Regex]::Escape($IPAddress)), '(?<MAC>([0-9A-Fa-f]{2}[:]){5}([0-9A-Fa-f]{2}))'
         $ArpResult = & $Arp -a
         foreach ($Line in $ArpResult) {
