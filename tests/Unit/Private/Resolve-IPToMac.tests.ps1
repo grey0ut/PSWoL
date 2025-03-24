@@ -1,4 +1,3 @@
-
 BeforeAll {
     Import-Module $ModuleName
 }
@@ -6,7 +5,12 @@ BeforeAll {
 Describe 'Resolve-IPToMac' {
     InModuleScope $ModuleName {
         It 'Should resolve Gateway address to MAC' {
-            $Interfaces = [System.Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() | Where-Object { $_.NetworkInterfaceType -ne [System.Net.NetworkInformation.NetworkInterfaceType]::Loopback -and $_.OperationalStatus -eq [System.Net.NetworkInformation.OperationalStatus]::Up } 
+            $Interfaces = [System.Net.NetworkInformation.NetworkInterface]::GetAllNetworkInterfaces() | Where-Object {
+                ($_.NetworkInterfaceType -eq [System.Net.NetworkInformation.NetworkInterfaceType]::Ethernet -or 
+                $_.NetworkInterfaceType -eq [System.Net.NetworkInformation.NetworkInterfaceType]::Wireless80211) -and
+                $_.Description -notmatch 'Virtual' -and
+                $_.OperationalStatus -eq [System.Net.NetworkInformation.OperationalStatus]::Up
+            } 
             $Interface = $Interfaces | Select-Object -First 1
             $GWAddress = $Interface.GetIPProperties().GatewayAddresses.Address.IPAddressToString
             $Result = Resolve-IPToMac -IPAddress $GWAddress

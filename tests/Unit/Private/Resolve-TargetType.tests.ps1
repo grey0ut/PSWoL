@@ -1,4 +1,3 @@
-
 BeforeAll {
     Import-Module $ModuleName
 }
