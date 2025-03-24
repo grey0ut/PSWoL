@@ -32,9 +32,7 @@ function Resolve-IPToMac {
     }
 
     if ($Windows) {
-        $Result = Get-NetNeighbor -IPAddress $IPAddress -AddressFamily IPv4 | Where-Object {
-            $_.LinkLayerAddress -ne ''
-        }
+        $Result = Get-NetNeighbor -IPAddress $IPAddress -AddressFamily IPv4 | Where-Object { $_.LinkLayerAddress -ne '' } | Select-Object -First 1
         [System.Net.NetworkInformation.PhysicalAddress]::Parse(($Result.LinkLayerAddress.ToUpper() -replace '[^0-9A-F]',''))
     } else {
         $Arp = Get-Command -Name "arp" | Select-Object -ExpandProperty Source

@@ -12,6 +12,10 @@ function Save-WolTarget {
     00-1a-1e-12-af-38
     001A.1E12.AF38
     001A1E12AF38
+    .EXAMPLE
+    PS> Save-WolTarget -Name "TheGibson" -MacAddress "16:12:EB:E0:32:28"
+
+    # will save the decorative name TheGibson with MAC address 16:12:EB:E0:32:28 to a local settings file
     #>
     [CmdletBinding()]
     param (
@@ -53,10 +57,10 @@ function Save-WolTarget {
 
     try {
         if (Test-Path $SettingsFile) {
-            Write-Verbose "Saving targets to $($SettingsFile)"
+            Write-Verbose "Saving target to $($SettingsFile)"
             $SavedTargets | ConvertTo-Json | Out-File -FilePath $SettingsFile -Force
             } else {
-                Write-Verbose "Saving targets to $($SettingsFile)"
+                Write-Verbose "Saving target to $($SettingsFile)"
                 New-Item -Path $SettingsFile -Force | Out-Null
                 $SavedTargets | ConvertTo-Json | Out-File -FilePath $SettingsFile
             }

@@ -5,9 +5,25 @@ function Get-WolTarget {
     .DESCRIPTION
     Can retrieve a saved target's MAC by memorable name or if called with no -Name parameter will return a table of all saved targets.
     .PARAMETER Name
-    The name to look up in the saved targets file. Must be an exact match 
+    The name to look up in the saved targets file. Must be an exact match
+    .EXAMPLE
+    PS> Get-WolTarget
+    Name                           Value
+    ----                           -----
+    gibson2                        16:12:EB:E0:32:28
+    Gibson1                        16:12:EB:E0:32:28
+
+    # returns all of the saved targets if present.
+    .EXAMPLE
+    PS> Get-WolTarget -Name gibson1
+    Name    MAC
+    ----    ---
+    gibson1 16:12:EB:E0:32:28
+
+    # returns a PSCustomobject with the name and MAC of the saved target
     #>
     [CmdletBinding()]
+    [OutputType([System.Collections.Hashtable])]
     param (
         [String]$Name
     )

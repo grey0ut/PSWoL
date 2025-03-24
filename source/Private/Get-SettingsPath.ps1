@@ -4,7 +4,9 @@ function Get-SettingsPath {
     Determine the path where saved targets are stored.
     .DESCRIPTION
     Depending on the OS, return an appropriate path relative to the user to store a json file containing saved targets.
-    
+    .EXAMPLE
+    PS> Get-SettingsPath
+    C:\Users\Admin\Appdata\Roaming\PSWol\Settings.json
     #>
     [CmdletBinding()]
     [OutputType([String])]
